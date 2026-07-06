@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>동아리 마음 건강 설문조사</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+        }
+        .nav-bar {
+            background-color: #1e293b;
+            padding: 15px 20px;
+            text-align: right;
+        }
+        .nav-bar a {
+            color: #cbd5e1;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+        .nav-bar a:hover {
+            color: white;
+        }
+        .nav-bar a.active {
+            color: #6366f1;
+        }
+        .header {
+            background-color: #4f46e5;
+            color: white;
+            text-align: center;
+            padding: 50px 20px;
+        }
+        .header h1 { margin: 0; font-size: 2rem; }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .survey-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            margin-bottom: 25px;
+        }
+        .question-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #0f172a;
+            margin-bottom: 15px;
+        }
+        .options label {
+            display: block;
+            background: #f8fafc;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .options label:hover {
+            background: #e0e7ff;
+            border-color: #a5b4fc;
+        }
+        .options input[type="radio"] {
+            margin-right: 10px;
+        }
+        .btn-submit {
+            display: block;
+            width: 100%;
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);
+        }
+        .btn-submit:hover {
+            background-color: #4338ca;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <a href="index.html">홈</a>
+        <a href="survey.html" class="active">설문조사</a>
+    </div>
+
+    <div class="header">
+        <h1>마음 건강 인식 설문조사</h1>
+    </div>
+
+    <div class="container">
+        <div class="survey-card">
+            <div class="question-title">Q1. 주변에 우울증이나 심한 무기력감을 겪는 친구가 있다면 알아챌 수 있나요?</div>
+            <div class="options">
+                <label><input type="radio" name="q1" value="1"> 바로 알아챌 수 있을 것 같다</label>
+                <label><input type="radio" name="q1" value="2"> 주의 깊게 관찰하면 알 수 있을 것 같다</label>
+                <label><input type="radio" name="q1" value="3"> 잘 모른 채 지나칠 것 같다</label>
+            </div>
+        </div>
+
+        <div class="survey-card">
+            <div class="question-title">Q2. 힘들어하는 친구에게 가장 먼저 건네고 싶은 대화 방식은 무엇인가요?</div>
+            <div class="options">
+                <label><input type="radio" name="q2" value="1"> "많이 힘들었겠구나" 하고 묵묵히 들어주기</label>
+                <label><input type="radio" name="q2" value="2"> "이런 방법을 써봐" 하고 해결책 조언해주기</label>
+                <label><input type="radio" name="q2" value="3"> 기분 전환을 위해 다른 재밌는 활동 제안하기</label>
+            </div>
+        </div>
+
+        <button type="button" class="btn-submit" onclick="alert('제출되었습니다! 발표에 소중한 의견으로 참고하겠습니다.')">설문 제출하기</button>
+    </div>
+
+</body>
+</html>
+
