@@ -111,15 +111,31 @@
             margin-bottom: 60px;
             border: 1px dashed #cbd5e1;
         }
-        /* 💡 </style> 바로 직전 위치에 추가할 디자인 조각 */
-#result-section { display: none; } /* 처음엔 숨겨두는 역할 */
-.status-badge { display: inline-block; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 1.2rem; margin-top: 10px; }
-.status-green { background-color: #10b981; color: white; }
-.status-yellow { background-color: #f59e0b; color: white; }
-.status-red { background-color: #ef4444; color: white; }
-.action-box { background-color: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 12px; margin: 20px 0; text-align: left; line-height: 1.6; }
-.chart-container { position: relative; margin: 30px auto; height: 300px; width: 100%; background: #111827; padding: 15px; border-radius: 12px; box-sizing: border-box; }
-        </style>
+        
+        /* 💡 추가 및 수정된 결과 대시보드 및 차트 디자인 영역 */
+        #result-section { display: none; margin-bottom: 40px; } /* 처음엔 완벽하게 숨겨둡니다 */
+        .status-badge { display: inline-block; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 1.2rem; margin-top: 10px; }
+        .status-green { background-color: #10b981; color: white; }
+        .status-yellow { background-color: #f59e0b; color: white; }
+        .status-red { background-color: #ef4444; color: white; }
+        .action-box { background-color: #f1f5f9; border-left: 4px solid #6366f1; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left; line-height: 1.6; color: #334155; }
+        .chart-container { position: relative; margin: 30px auto; height: 300px; width: 100%; background: #111827; padding: 15px; border-radius: 12px; box-sizing: border-box; }
+        
+        .save-btn {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4);
+            display: inline-block;
+        }
+        .save-btn:hover { background-color: #059669; }
+    </style>
 </head>
 <body>
 
@@ -129,7 +145,7 @@
     </div>
 
     <div class="header">
-        <h1>PHQ-Q 자가진단</h1>
+        <h1>PHQ-9 자가진단</h1>
         <p>가벼운 마음으로 답변하세요</p>
     </div>
 
@@ -140,23 +156,25 @@
 
         <div id="survey-questions"></div>
 
-        <button type="button" class="btn-submit" onclick="alert('제출이 완료되었습니다. 스스로의 마음을 솔직하게 들여다본 여러분을 응원합니다.')">결과 제출하기</button>
+        <button type="button" class="btn-submit" onclick="submitSurvey()">결과 제출하기</button>
+        
         <div id="result-section">
-    <h2>진단 결과</h2>
-    <p style="font-size: 1.3rem;">당신은 <span id="status-text" class="status-badge">🟢 상태</span> 입니다.</p>
-    <p id="result-message" style="color: #94a3b8;"></p>
-    
-    <div id="action-plan" class="action-box"></div>
-    
-    <button onclick="saveTodayScore()" class="save-btn">오늘의 결과 기록하기</button>
-    
-    <hr style="border: 0.5px solid #334155; margin: 30px 0;">
+            <hr style="border: 0.5px solid #cbd5e1; margin: 30px 0;">
+            <h2>진단 결과</h2>
+            <p style="font-size: 1.3rem;">당신은 <span id="status-text" class="status-badge">🟢 상태</span> 입니다.</p>
+            <p id="result-message" style="color: #64748b; font-weight: 500;"></p>
+            
+            <div id="action-plan" class="action-box"></div>
+            
+            <button type="button" onclick="saveTodayScore()" class="save-btn">오늘의 결과 기록하기</button>
+            
+            <hr style="border: 0.5px solid #cbd5e1; margin: 40px 0;">
 
-    <h3>📊 나의 누적 마음 날씨 양상</h3>
-    <div class="chart-container">
-        <canvas id="mentalChart"></canvas>
-    </div>
-</div>
+            <h3>📊 나의 누적 마음 날씨 양상</h3>
+            <div class="chart-container">
+                <canvas id="mentalChart"></canvas>
+            </div>
+        </div>
 
         <div class="support-info">
             <p><strong>💡 힘든 마음을 혼자 견디고 계시나요?</strong></p>
@@ -170,7 +188,7 @@
     </div>
 
     <script>
-        // 1. 질문 내용들을 리스트로 묶어서 컴퓨터에게 알려줍니다.
+        // 9개 자가진단 문항 데이터
         const questions = [
             "일을 하거나 무언가를 하는 것에 대한 흥미나 즐거움이 거의 없다.",
             "기분이 가라앉거나, 우울하거나, 희망이 없다고 느낀다.",
@@ -183,14 +201,11 @@
             "차라리 죽는 게 낫겠다는 생각이 들거나, 어떤 식으로든 자해를 하려고 생각했다."
         ];
 
-        // 2. 질문들이 들어갈 비어있는 HTML 상자를 가져옵니다.
         const targetDiv = document.getElementById('survey-questions');
 
-        // 3. 반복문을 돌려서 9개의 상자를 자동으로 만들어 채워 넣습니다!
+        // 반복문을 통한 진단 카드 동적 생성
         questions.forEach((qText, index) => {
-            const qNum = index + 1; // 문제 번호 (1부터 시작)
-            
-            // 공통으로 들어갈 카드 박스 형태를 자바스크립트가 알아서 조립해 줍니다.
+            const qNum = index + 1;
             const cardHTML = `
                 <div class="survey-card">
                     <div class="question-title">${qNum}. ${qText}</div>
@@ -202,92 +217,119 @@
                     </div>
                 </div>
             `;
-            
-            // 조립된 상자를 차곡차곡 누적해서 넣어줍니다.
             targetDiv.innerHTML += cardHTML;
         });
-        // 💡 기존 <script> 내부의 적절한 빈 공간에 추가할 함수들
-let currentScore = 0; 
-let myChart = null;   
 
-function finishSurvey(totalScore) {
-    currentScore = totalScore;
-    const resultSection = document.getElementById("result-section");
-    const statusText = document.getElementById("status-text");
-    const resultMessage = document.getElementById("result-message");
-    const actionPlan = document.getElementById("action-plan");
+        let currentScore = 0; 
+        let myChart = null;   
 
-    resultSection.style.display = "block"; // 결과창 열기
+        // 🛠️ 추가: 제출 시 모든 항목을 검사하여 총점을 연산하는 핵심 연결 장치
+        function submitSurvey() {
+            let totalScore = 0;
+            let allChecked = true;
 
-    if (totalScore <= 10) {
-        statusText.innerText = "🟢 안정적인";
-        statusText.className = "status-badge status-green";
-        resultMessage.innerText = "현재 마음 상태가 비교적 평온하고 안정적입니다.";
-        actionPlan.innerHTML = `<strong>💡 권장 행동 절차:</strong><br>• 규칙적인 수면과 식습관을 계속 유지해 주세요.<br>• 매일 밤 가벼운 산책이나 스트레칭으로 신체 활력을 깨워보세요.`;
-    } else if (totalScore <= 20) {
-        statusText.innerText = "🟡 주의가 필요한";
-        statusText.className = "status-badge status-yellow";
-        resultMessage.innerText = "최근 학업이나 환경으로 인해 마음의 에너지가 다소 지친 상태입니다.";
-        actionPlan.innerHTML = `<strong>💡 권장 행동 절차:</strong><br>• 신뢰할 수 있는 친구, 가족 혹은 학교 상담 선생님과 가볍게 이야기를 나눠보세요.<br>• 하루 10분씩 스마트폰을 멀리하고 조용한 음악을 들으며 호흡에 집중해 보세요.`;
-    } else {
-        statusText.innerText = "🔴 도움을 권장하는";
-        statusText.className = "status-badge status-red";
-        resultMessage.innerText = "마음의 부담이 큽니다. 이는 감기처럼 누구나 겪을 수 있는 신호입니다.";
-        actionPlan.innerHTML = `<strong>💡 권장 행동 절차:</strong><br>• 혼자 고민을 극복하려 하기보다 전문 상담 전화를 통해 편안하게 대화해 보는 것을 강력히 추천합니다.<br>• 청소년 모바일 상담 '다 들어줄 개' (문자 1661-5004)<br>• 정신건강 상담전화 (국번없이 1577-0199)`;
-    }
-    initChart(); // 차트 그리기 함수 호출
-}
+            for (let i = 1; i <= 9; i++) {
+                const checkedOption = document.querySelector(`input[name="q${i}"]:checked`);
+                if (checkedOption) {
+                    totalScore += parseInt(checkedOption.value);
+                } else {
+                    allChecked = false;
+                }
+            }
 
-function saveTodayScore() {
-    const today = new Date().toLocaleDateString();
-    localStorage.setItem(today, currentScore);
-    alert("오늘의 기록이 안전하게 저장되었습니다.");
-    initChart(); 
-}
+            // 미답변 문항 검증 유효성 확인
+            if (!allChecked) {
+                alert("아직 답변하지 않은 문항이 있습니다. 모든 문항에 솔직하게 답변해 주세요!");
+                return;
+            }
 
-function initChart() {
-    const ctx = document.getElementById('mentalChart').getContext('2d');
-    const dates = []; const scores = [];
-    for (let i = 0; i < localStorage.length; i++) { dates.push(localStorage.key(i)); }
-    dates.sort();
-    dates.forEach(date => { scores.push(parseInt(localStorage.getItem(date))); });
-
-    if (myChart !== null) { myChart.destroy(); }
-
-    // 배경색 플러그인
-    const backgroundZonesPlugin = {
-        id: 'backgroundZones',
-        beforeDraw: (chart) => {
-            const { ctx, chartArea: { left, right, top, bottom }, scales: { y } } = chart;
-            ctx.save();
-            ctx.fillStyle = 'rgba(16, 185, 129, 0.1)'; // 초록
-            ctx.fillRect(left, y.getPixelForValue(10), right - left, y.getPixelForValue(0) - y.getPixelForValue(10));
-            ctx.fillStyle = 'rgba(245, 158, 11, 0.1)'; // 노랑
-            ctx.fillRect(left, y.getPixelForValue(20), right - left, y.getPixelForValue(10) - y.getPixelForValue(20));
-            ctx.fillStyle = 'rgba(239, 68, 68, 0.1)'; // 빨강
-            ctx.fillRect(left, y.getPixelForValue(30), right - left, y.getPixelForValue(20) - y.getPixelForValue(30));
-            ctx.restore();
+            alert("제출이 완료되었습니다. 스스로의 마음을 솔직하게 들여다본 여러분을 응원합니다.");
+            finishSurvey(totalScore);
         }
-    };
 
-    myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: dates.length ? dates : ["기록 없음"],
-            datasets: [{ label: '나의 마음 점수', data: scores.length ? scores : [0], borderColor: '#818cf8', borderWidth: 3, tension: 0.2, pointRadius: 5 }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            scales: {
-                x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
-                y: { min: 0, max: 30, grid: { color: '#334155' }, ticks: { color: '#94a3b8', stepSize: 5 } }
-            },
-            plugins: { legend: { display: false } }
-        },
-        plugins: [backgroundZonesPlugin]
-    });
-}
+        // 결과 가시화 및 행동 대책 매핑 함수
+        function finishSurvey(totalScore) {
+            currentScore = totalScore;
+            const resultSection = document.getElementById("result-section");
+            const statusText = document.getElementById("status-text");
+            const resultMessage = document.getElementById("result-message");
+            const actionPlan = document.getElementById("action-plan");
 
+            resultSection.style.display = "block"; // 숨겨진 결과 섹션 활성화
+
+            if (totalScore <= 10) {
+                statusText.innerText = "🟢 안정적인";
+                statusText.className = "status-badge status-green";
+                resultMessage.innerText = `현재 마음 점수는 ${totalScore}점이며, 상태가 비교적 평온하고 안정적입니다.`;
+                actionPlan.innerHTML = `<strong>💡 권장 행동 절차:</strong><br>• 규칙적인 수면과 식습관을 계속 유지해 주세요.<br>• 매일 밤 가벼운 산책이나 스트레칭으로 신체 활력을 깨워보세요.`;
+            } else if (totalScore <= 20) {
+                statusText.innerText = "🟡 주의가 필요한";
+                statusText.className = "status-badge status-yellow";
+                resultMessage.innerText = `현재 마음 점수는 ${totalScore}점이며, 최근 학업이나 환경으로 인해 마음의 에너지가 다소 지친 상태입니다.`;
+                actionPlan.innerHTML = `<strong>💡 권장 행동 절차:</strong><br>• 신뢰할 수 있는 친구, 가족 혹은 학교 Wee클래스 상담 선생님과 가볍게 이야기를 나눠보세요.<br>• 하루 10분씩 스마트폰을 멀리하고 조용한 음악을 들으며 호흡에 집중해 보세요.`;
+            } else {
+                statusText.innerText = "🔴 도움을 권장하는";
+                statusText.className = "status-badge status-red";
+                resultMessage.innerText = `현재 마음 점수는 ${totalScore}점이며, 마음의 부담이 다소 큰 상태입니다. 이는 감기처럼 누구나 겪을 수 있는 자연스러운 신호입니다.`;
+                actionPlan.innerHTML = `<strong>💡 권장 행동 절차:</strong><br>• 혼자 고민을 극복하려 하기보다 전문 상담 창구를 통해 편안하게 대화해 보는 것을 강력히 추천합니다.<br>• 청소년 모바일 상담 '다 들어줄 개' (문자/카톡 1388 혹은 1661-5004)<br>• 정신건강 상담전화 (국번없이 1577-0199)`;
+            }
+            
+            // 결과 화면으로 화면을 매끄럽게 스크롤 이동시킵니다
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+            initChart(); 
+        }
+
+        // 로컬스토리지 누적 저장 연산
+        function saveTodayScore() {
+            const today = new Date().toLocaleDateString();
+            localStorage.setItem(today, currentScore);
+            alert("오늘의 심리 점수가 누적 데이터에 안전하게 저장되었습니다.");
+            initChart(); 
+        }
+
+        // Chart.js를 이용한 시계열 추이 분석 그래프 빌드 함수
+        function initChart() {
+            const ctx = document.getElementById('mentalChart').getContext('2d');
+            const dates = []; const scores = [];
+            for (let i = 0; i < localStorage.length; i++) { dates.push(localStorage.key(i)); }
+            dates.sort();
+            dates.forEach(date => { scores.push(parseInt(localStorage.getItem(date))); });
+
+            if (myChart !== null) { myChart.destroy(); } // 리렌더링 중첩 에러 방지
+
+            // Y축 점수 구간별 배경색 분할 커스텀 플러그인
+            const backgroundZonesPlugin = {
+                id: 'backgroundZones',
+                beforeDraw: (chart) => {
+                    const { ctx, chartArea: { left, right }, scales: { y } } = chart;
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(16, 185, 129, 0.08)'; // 0~10점 초록 구간
+                    ctx.fillRect(left, y.getPixelForValue(10), right - left, y.getPixelForValue(0) - y.getPixelForValue(10));
+                    ctx.fillStyle = 'rgba(245, 158, 11, 0.08)'; // 11~20점 노랑 구간
+                    ctx.fillRect(left, y.getPixelForValue(20), right - left, y.getPixelForValue(10) - y.getPixelForValue(20));
+                    ctx.fillStyle = 'rgba(239, 68, 68, 0.08)';  // 21~27점 빨강 위험 구간
+                    ctx.fillRect(left, y.getPixelForValue(27), right - left, y.getPixelForValue(20) - y.getPixelForValue(27));
+                    ctx.restore();
+                }
+            };
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates.length ? dates : ["기록 없음"],
+                    datasets: [{ label: '나의 마음 점수 추이', data: scores.length ? scores : [0], borderColor: '#818cf8', borderWidth: 3, tension: 0.2, pointRadius: 5 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+                        y: { min: 0, max: 27, grid: { color: '#334155' }, ticks: { color: '#94a3b8', stepSize: 5 } } // PHQ-9의 만점은 27점입니다.
+                    },
+                    plugins: { legend: { display: false } }
+                },
+                plugins: [backgroundZonesPlugin]
+            });
+        }
     </script>
 </body>
 </html>
